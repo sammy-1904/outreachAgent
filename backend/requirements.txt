@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+sqlalchemy
+aiosqlite
+faker
+tenacity
+httpx
+langgraph
+python-dotenv
+pytest
+pytest-asyncio
+sse-starlette
+groq

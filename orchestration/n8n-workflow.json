@@ -1,0 +1,302 @@
+{
+  "name": "Outreach Agent Pipeline - Full MCP",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "count",
+              "value": 50
+            }
+          ],
+          "boolean": [
+            {
+              "name": "ai_mode",
+              "value": true
+            },
+            {
+              "name": "dry_run",
+              "value": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "config",
+      "name": " Pipeline Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        260,
+        300
+      ],
+      "notesInFlow": true,
+      "notes": "CONFIGURE HERE:\n- count: number of leads\n- ai_mode: true for AI enrichment\n- dry_run: true to simulate sending"
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:8000/tools/generate_leads",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ count: $json.count || 50, seed: null }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "generate",
+      "name": "1️⃣ Generate Leads",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        440,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:8000/tools/enrich_leads",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ ai_mode: $(' Pipeline Config').item.json.ai_mode }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "enrich",
+      "name": "2️⃣ Enrich Leads",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        640,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:8000/tools/generate_messages",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ ai_mode: $(' Pipeline Config').item.json.ai_mode }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "message",
+      "name": "3️⃣ Generate Messages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        840,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:8000/tools/send_outreach",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ dry_run: $(' Pipeline Config').item.json.dry_run }) }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "send",
+      "name": "4️⃣ Send Outreach",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1040,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:8000/tools/get_status",
+        "method": "GET",
+        "options": {}
+      },
+      "id": "status",
+      "name": "5️⃣ Get Final Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Agent: Analyze pipeline results and provide summary\nconst config = $(' Pipeline Config').item.json;\nconst statusResult = $input.first().json;\nconst statusCounts = statusResult.result?.status_counts || {};\n\nconst total = statusResult.result?.total || 0;\nconst sent = statusCounts.SENT || 0;\nconst failed = statusCounts.FAILED || 0;\n\n// Calculate success rate\nconst successRate = total > 0 ? ((sent / total) * 100).toFixed(1) : 0;\n\n// Determine overall status\nlet pipelineStatus = '✅ SUCCESS';\nlet emoji = '🎉';\nif (failed > sent) {\n  pipelineStatus = '⚠️ PARTIAL_FAILURE';\n  emoji = '⚠️';\n}\nif (sent === 0 && failed > 0) {\n  pipelineStatus = '❌ FAILURE';\n  emoji = '😞';\n}\n\nreturn {\n  json: {\n    emoji: emoji,\n    pipeline_status: pipelineStatus,\n    config: {\n      ai_mode: config.ai_mode,\n      dry_run: config.dry_run,\n      count: config.count\n    },\n    summary: {\n      total_leads: total,\n      sent: sent,\n      failed: failed,\n      success_rate: `${successRate}%`\n    },\n    status_breakdown: statusCounts,\n    recommendation: failed > 0 \n      ? `${failed} leads failed. Check error logs and retry if needed.`\n      : 'All leads processed successfully! 🚀'\n  }\n};"
+      },
+      "id": "agent",
+      "name": " Agent: Analyze Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": " Pipeline Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    " Pipeline Config": {
+      "main": [
+        [
+          {
+            "node": "1️⃣ Generate Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1️⃣ Generate Leads": {
+      "main": [
+        [
+          {
+            "node": "2️⃣ Enrich Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2️⃣ Enrich Leads": {
+      "main": [
+        [
+          {
+            "node": "3️⃣ Generate Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3️⃣ Generate Messages": {
+      "main": [
+        [
+          {
+            "node": "4️⃣ Send Outreach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4️⃣ Send Outreach": {
+      "main": [
+        [
+          {
+            "node": "5️⃣ Get Final Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5️⃣ Get Final Status": {
+      "main": [
+        [
+          {
+            "node": " Agent: Analyze Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "outreach-agent-v3",
+  "meta": {
+    "instanceId": "outreach-demo"
+  },
+  "tags": [
+    {
+      "name": "MCP",
+      "id": "1"
+    },
+    {
+      "name": "Lead Generation",
+      "id": "2"
+    }
+  ]
+}

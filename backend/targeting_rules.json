@@ -1,0 +1,146 @@
+{
+    "company_size_rules": {
+        "Software": "SMB",
+        "Technology": "SMB",
+        "Manufacturing": "Enterprise",
+        "Retail": "Mid-Market",
+        "Healthcare": "Mid-Market",
+        "Logistics": "Mid-Market",
+        "Finance": "Enterprise",
+        "Consulting": "Mid-Market"
+    },
+    "persona_rules": {
+        "VP": "Executive",
+        "Head": "Department Head",
+        "Director": "Director",
+        "Manager": "Manager",
+        "Lead": "Team Lead",
+        "Senior": "Senior Professional",
+        "CTO": "C-Suite",
+        "CEO": "C-Suite",
+        "CFO": "C-Suite",
+        "COO": "C-Suite",
+        "CMO": "C-Suite",
+        "Founder": "C-Suite"
+    },
+    "pain_points": {
+        "Software": [
+            "Release velocity bottlenecks",
+            "Rising cloud costs",
+            "Technical debt",
+            "Developer productivity"
+        ],
+        "Technology": [
+            "Scaling infrastructure",
+            "Security concerns",
+            "Talent retention",
+            "Integration complexity"
+        ],
+        "Manufacturing": [
+            "Downtime and maintenance",
+            "Supplier risk",
+            "Quality control",
+            "Workforce safety"
+        ],
+        "Retail": [
+            "Inventory accuracy",
+            "Cart abandonment",
+            "Customer retention",
+            "Omnichannel challenges"
+        ],
+        "Healthcare": [
+            "Staffing shortages",
+            "Compliance overhead",
+            "Patient satisfaction",
+            "Data security"
+        ],
+        "Logistics": [
+            "On-time delivery",
+            "Route inefficiency",
+            "Fuel cost management",
+            "Fleet visibility"
+        ],
+        "Finance": [
+            "Regulatory compliance",
+            "Fraud detection",
+            "Customer onboarding",
+            "Legacy systems"
+        ],
+        "Consulting": [
+            "Client acquisition",
+            "Resource utilization",
+            "Knowledge management",
+            "Competitive differentiation"
+        ]
+    },
+    "triggers": {
+        "Software": [
+            "New product launch",
+            "Security incidents",
+            "Scaling challenges",
+            "Series funding"
+        ],
+        "Technology": [
+            "Digital transformation",
+            "Cloud migration",
+            "M&A activity",
+            "Leadership change"
+        ],
+        "Manufacturing": [
+            "Line expansions",
+            "New plant",
+            "Automation initiatives",
+            "Supply chain disruption"
+        ],
+        "Retail": [
+            "Peak season",
+            "New store openings",
+            "E-commerce expansion",
+            "Brand refresh"
+        ],
+        "Healthcare": [
+            "Regulatory change",
+            "EHR upgrade",
+            "Facility expansion",
+            "Merger integration"
+        ],
+        "Logistics": [
+            "Fuel spikes",
+            "Network redesign",
+            "Fleet modernization",
+            "New routes"
+        ],
+        "Finance": [
+            "Regulatory update",
+            "Digital banking push",
+            "Fintech partnership",
+            "Risk assessment"
+        ],
+        "Consulting": [
+            "Practice expansion",
+            "New verticals",
+            "Geographic growth",
+            "Technology adoption"
+        ]
+    },
+    "default_pains": [
+        "Operational inefficiency",
+        "Cost optimization needs",
+        "Process bottlenecks"
+    ],
+    "default_triggers": [
+        "Budget cycle",
+        "Strategic planning phase",
+        "Growth initiatives"
+    ],
+    "tier1_countries": [
+        "USA",
+        "UK",
+        "Canada",
+        "Germany",
+        "France",
+        "Australia",
+        "Netherlands",
+        "Singapore"
+    ]
+}
